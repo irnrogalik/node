@@ -1,0 +1,44 @@
+{{#if thank}}<h3>{{thank}}</h3>{{/if}}
+{{#if orderList}}
+    <table class="table border-bottom">
+        <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each orderList.products}}
+            <tr>
+                <td>{{Name}}</td>
+                <td>1</td>
+                <td>{{Price}}</td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+    {{#unless thank}}
+        <form action="/cart/order/" method="post">
+            <p>
+                <label>Sales Taxes: <input type="text" class="no-border" name="sales_taxes"
+                                           value="{{orderList.order.totalTax}}"
+                                           readonly>
+                </label>
+            </p>
+            <p>
+                <label>Total: <input type="text" class="no-border"
+                                     name="total" value="{{orderList.order.total}}"
+                                     readonly>
+                </label>
+            </p>
+            <button type="submit">Order</button>
+        </form>
+    {{else}}
+        <p>Sales Taxes: {{orderList.order.totalTax}}</p>
+        <p>Total: {{orderList.order.total}}</p>
+    {{/unless}}
+{{else}}
+    <p>Cart is empty</p>
+{{/if}}

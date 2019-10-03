@@ -1,0 +1,26 @@
+<p><a href="/taxes/add">Add tax</a></p>
+
+{{#if taxes}}
+    <table class="table">
+        <thead class="thead-light">
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each taxes}}
+            <tr>
+                <td>{{Name}}</td>
+                <td>{{Value}}</td>
+                <td>
+                    <form action="/taxes/delete/{{this.Id}}" method="POST">
+                        <input type="submit" value="Delete"/>
+                    </form>
+                </td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+{{/if}}

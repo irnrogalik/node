@@ -1,0 +1,16 @@
+
+<form method="POST">
+    <label>Name</label><br>
+    <input name="name" class="field"/><br><br>
+    <label>Price</label><br>
+    <input name="price" class="field"/><br><br>
+    <label>Category</label><br>
+    <select name="category" multiple>
+        <option value=""></option>
+        {{#each categories}}
+            <option value="{{Id}}">{{Name}}</option>
+        {{/each}}
+    </select>
+    <input type="submit" value="Отправить"/>
+</form>
+<a href="javascript:history.go(-1)" class="button_back">Back</a>
