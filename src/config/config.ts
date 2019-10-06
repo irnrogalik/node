@@ -6,7 +6,7 @@ const config = {
     port: 3307,
     user: 'test',
     password: 'test',
-    database: 'test'
+    database: 'test_task'
   }
 };
 
