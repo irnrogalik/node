@@ -10,10 +10,11 @@ import taxesRouter from './taxes/taxController';
 import categoriesRouter from './categories/categoryController';
 import productsRouter from './products/productController';
 import cartRouter from './cart/cartController';
-// import indexRouter from './routes/index';
+import indexRouter from './index/indexController';
 
 const port = 3010;
 const app = express();
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -32,6 +33,7 @@ app.use('/taxes', taxesRouter);
 app.use('/categories', categoriesRouter);
 app.use('/products', productsRouter);
 app.use('/cart', cartRouter);
+app.use('/', indexRouter);
 
 app.get('/', (req, res) => {
   res.send('Index page');
