@@ -17,7 +17,6 @@ class CartServices {
     if (orderListCart) {
       try {
         const products = await CartModel.getListProductsInCart(orderListCart);
-        console.log(products, 'products');
         res.render('cart', {
           orderList: products
         });

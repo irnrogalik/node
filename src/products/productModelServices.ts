@@ -10,12 +10,14 @@ class ProductModelServices {
   }
 
   async getListProducts () {
-    const query = `SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products 
-    LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
-    LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id 
-    GROUP BY Products.Id, Products.Name, Products.Price;`;
+    // const query = `SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products
+    // LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
+    // LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id
+    // GROUP BY Products.Id, Products.Name, Products.Price;`;
+    const query = 'CALL getProductsList()';
     try {
-      const [productList] = await this.connection.query(query);
+      let [productList] = await this.connection.query(query);
+      productList = productList[0];
       return productList;
     } catch (e) {
       throw new Error(e);

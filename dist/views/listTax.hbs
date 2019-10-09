@@ -6,6 +6,7 @@
         <tr>
             <th>Name</th>
             <th>Value</th>
+            <th>Description</th>
             <th></th>
         </tr>
         </thead>
@@ -14,6 +15,7 @@
             <tr>
                 <td>{{Name}}</td>
                 <td>{{Value}}</td>
+                <td>{{Description}}</td>
                 <td>
                     <form action="/taxes/delete/{{this.Id}}" method="POST">
                         <input type="submit" value="Delete"/>

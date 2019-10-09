@@ -23,7 +23,7 @@ class CategoryModelServices {
 
   async getListTaxes () {
     try {
-      const query = 'SELECT * FROM Taxes';
+      const query = 'SELECT * FROM getTaxes';
       const [taxes] = await this.connection.query(query);
       return taxes;
     } catch (e) {

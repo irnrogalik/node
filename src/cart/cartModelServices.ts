@@ -11,13 +11,10 @@ class CartModelServices {
 
     async getListProductsInCart (orderListCart: any[]): Promise<object> {
       try {
-        const query = 'SELECT Products.Id, Products.Name, Products.Price, SUM(Products.Price * (Taxes.Value / 100)) as ProductTax From Products ' +
-                'left join ProductTaxes on Products.Id = ProductTaxes.ProductId ' +
-                'left join Taxes on ProductTaxes.TaxId = Taxes.Id ' +
-                'WHERE Products.Id IN (' + Object.keys(orderListCart).join(',') + ')' +
-                'group by Products.Id, Products.Name, Products.Price';
+        const query = `CALL getProductsListInCart('${Object.keys(orderListCart).join(',')}')`;
 
-        const [result] = await this.connection.query(query);
+        let [result] = await this.connection.query(query);
+        result = result[0];
         const orderList = {
           products: [],
           order: {
