@@ -13,6 +13,7 @@ class TaxModelServices {
       const query = 'SELECT * FROM Taxes';
       try {
         const result = await this.connection.query(query);
+        console.log(result);
         return result[0]; // list of rows
       } catch (e) {
         throw new Error(e);
@@ -20,7 +21,7 @@ class TaxModelServices {
     }
 
     async addTax (newTax: any[]): Promise<boolean> {
-      const query = 'INSERT INTO Taxes (name, value) VALUES (?,?)';
+      const query = 'INSERT INTO Taxes (name, value, description) VALUES (?,?,?)';
       try {
         return await this.connection.query(query, newTax);
       } catch (e) {

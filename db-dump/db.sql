@@ -1,11 +1,13 @@
 CREATE DATABASE IF NOT EXISTS test_task;
 use test_task;
 
+-- create tables
 DROP TABLE IF EXISTS Taxes;
 CREATE TABLE Taxes (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Name VARCHAR(15) NOT NULL,
-    Value TINYINT DEFAULT NULL) 
+    Value TINYINT DEFAULT NULL,
+    Description VARCHAR(50) DEFAULT NULL)
     ENGINE = InnoDB;
 
 DROP TABLE IF EXISTS Categories;
@@ -41,7 +43,7 @@ CREATE TABLE IF NOT EXISTS ProductCategory (
     FOREIGN KEY (CategoryId) REFERENCES Categories (Id) ON DELETE CASCADE)
     ENGINE = InnoDB;
 
-DROP TABLE IF EXISTS Orders;    
+DROP TABLE IF EXISTS Orders;
 CREATE TABLE IF NOT EXISTS Orders (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -49,17 +51,46 @@ CREATE TABLE IF NOT EXISTS Orders (
     Total DECIMAL(10,2) NULL)
     ENGINE = InnoDB;
 
-DROP TABLE IF EXISTS OrderList;        
+DROP TABLE IF EXISTS OrderList;
 CREATE TABLE IF NOT EXISTS OrderList (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     OrderId INT NOT NULL,
     ProductId INT NOT NULL,
     Quantity TINYINT DEFAULT 1,
-    FOREIGN KEY (OrderId) REFERENCES Orders (Id) ON DELETE CASCADE, 
+    FOREIGN KEY (OrderId) REFERENCES Orders (Id) ON DELETE CASCADE,
     FOREIGN KEY (ProductId) REFERENCES Products (Id) ON DELETE CASCADE)
     ENGINE = InnoDB;
 
-delimiter |
+-- create storage procedures
+DELIMITER $$
+CREATE PROCEDURE getProductsListInCart(IN idList NVARCHAR(100))
+BEGIN
+	SET @sql = CONCAT('
+        SELECT Products.Id, Products.Name, Products.Price, SUM(Products.Price * (Taxes.Value / 100)) as ProductTax
+        FROM Products
+            LEFT JOIN ProductTaxes on Products.Id = ProductTaxes.ProductId
+            LEFT JOIN Taxes on ProductTaxes.TaxId = Taxes.Id
+        WHERE Products.Id IN (', idList, ')
+        GROUP BY Products.Id, Products.Name');
+
+    PREPARE stmt FROM @sql;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE getProductsList ()
+BEGIN
+	SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products
+		LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
+		LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id
+	GROUP BY Products.Id, Products.Name, Products.Price;
+END$$
+DELIMITER ;
+
+-- create triggers
+DELIMITER $$
 CREATE TRIGGER trg_AddProductTax
 AFTER INSERT
 ON ProductCategory FOR EACH ROW
@@ -72,14 +103,19 @@ BEGIN
 			VALUES (New.ProductId, @TaxId);
 		END IF;
 	END IF;
-END;
+END$$
+DELIMITER ;
 
-INSERT INTO Taxes (Name, Value)  
+-- create views
+CREATE VIEW getTaxes AS select Id, Name from Taxes;
+
+-- insert default data
+INSERT INTO Taxes (Name, Value)
   VALUES ("Basic sales", "10"), ("Import duty", "5");
 
-INSERT INTO Categories (Name, TaxId)  
-  VALUES 
-  ("Candy", null), 
+INSERT INTO Categories (Name, TaxId)
+  VALUES
+  ("Candy", null),
   ("Coffee", null),
   ("Popcorn", null),
   ("Wine", "1"),
@@ -102,7 +138,7 @@ INSERT INTO Products (Name, Price)
   ("300# bag of Fair-Trade Coffee", 997.99);
 
 INSERT INTO ProductCategory (ProductId, CategoryId)
-  VALUES 
+  VALUES
   (1, 1),
   (2, 6),
   (3, 3),
@@ -112,3 +148,5 @@ INSERT INTO ProductCategory (ProductId, CategoryId)
   (7, 6),
   (8, 4), (8, 5),
   (9, 2);
+
+

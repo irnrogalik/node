@@ -29,9 +29,9 @@ class TaxServices {
 
   async addTax (req: Request, res: Response) {
     if (!req.body) return res.sendStatus(400);
-    const { name, value } = req.body;
+    const { name, value, description } = req.body;
     try {
-      await TaxModel.addTax([name, value]);
+      await TaxModel.addTax([name, value, description]);
       res.redirect('/taxes');
     } catch (e) {
       res.send(e);

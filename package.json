@@ -7,7 +7,6 @@
     "start": "tsc && node dist/app.js",
     "lint": "eslint",
     "test": "mocha testing\\tests --exit",
-
     "docker-services": "docker-compose -f docker-compose.yml up -d"
   },
   "author": "",
