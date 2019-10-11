@@ -1,15 +1,17 @@
 'use strict';
 import mysql from 'mysql2';
+import { RedisModelServices } from '../redis/RedisModelServices';
+const redisModelServices = new RedisModelServices(6379);
 
 class CategoryModelServices {
   private connection: mysql.Socket;
 
-  constructor (connectionConfig: Object) {
+  constructor(connectionConfig: Object) {
     this.connection = mysql.createPool(connectionConfig);
     this.connection = this.connection.promise();
   }
 
-  async getListCategories () {
+  async getListCategories() {
     try {
       const query = `SELECT Categories.Id, Categories.Name, Taxes.Name as TaxName FROM Categories 
       LEFT JOIN Taxes ON Categories.TaxId = Taxes.Id 
@@ -21,7 +23,7 @@ class CategoryModelServices {
     }
   }
 
-  async getListTaxes () {
+  async getListTaxes() {
     try {
       const query = 'SELECT * FROM getTaxes';
       const [taxes] = await this.connection.query(query);
@@ -31,19 +33,26 @@ class CategoryModelServices {
     }
   }
 
-  async addCategory (newCategory: any[]) {
+  async addCategory(newCategory: any[]) {
     try {
       const query = 'INSERT INTO Categories (name, taxId) VALUES (?,?)';
       const insertCategory = await this.connection.query(query, newCategory);
-      return insertCategory.insertId;
+      const insertCategoryId = insertCategory.insertId;
+      redisModelServices.set({
+        [Date.now()]: `Category with id ${insertCategoryId} was added`
+      });
+      return insertCategoryId;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async deleteCategory (categotyId: number) {
+  async deleteCategory(categotyId: number) {
     try {
       const query = 'DELETE FROM Categories WHERE id=?';
+      redisModelServices.set({
+        [Date.now()]: `Category with id ${categotyId} was deleted`
+      });
       return await this.connection.query(query, categotyId);
     } catch (e) {
       throw new Error(e);

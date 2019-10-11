@@ -11,6 +11,7 @@ import categoriesRouter from './categories/categoryController';
 import productsRouter from './products/productController';
 import cartRouter from './cart/cartController';
 import indexRouter from './index/indexController';
+import redisRouter from './redis/redisController';
 
 const port = 3010;
 const app = express();
@@ -34,6 +35,7 @@ app.use('/categories', categoriesRouter);
 app.use('/products', productsRouter);
 app.use('/cart', cartRouter);
 app.use('/', indexRouter);
+app.use('/log', redisRouter);
 
 app.get('/', (req, res) => {
   res.send('Index page');

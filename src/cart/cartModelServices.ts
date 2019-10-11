@@ -1,108 +1,113 @@
 'user strict';
 import mysql from 'mysql2';
+import { getFormatDate } from '../lib/functions';
+import { RedisModelServices } from '../redis/RedisModelServices';
+const redisModelServices = new RedisModelServices(6379);
 
 class CartModelServices {
-    private connection: mysql.Socket;
+  private connection: mysql.Socket;
 
-    constructor (connectionConfig: Object) {
-      this.connection = mysql.createConnection(connectionConfig);
-      this.connection = this.connection.promise();
-    }
+  constructor(connectionConfig: Object) {
+    this.connection = mysql.createConnection(connectionConfig);
+    this.connection = this.connection.promise();
+  }
 
-    async getListProductsInCart (orderListCart: any[]): Promise<object> {
-      try {
-        const query = `CALL getProductsListInCart('${Object.keys(orderListCart).join(',')}')`;
+  async getListProductsInCart(orderListCart: any[]): Promise<object> {
+    try {
+      const query = `CALL getProductsListInCart('${Object.keys(orderListCart).join(',')}')`;
 
-        let [result] = await this.connection.query(query);
-        result = result[0];
-        const orderList = {
-          products: [],
-          order: {
-            total: 0,
-            totalTax: 0
-          }
-        };
-
-        for (const product of result) {
-          const prod = { Id: '', Name: '', Price: '' };
-          const price = Number(product.Price || 0);
-          const priceTax = Number(product.ProductTax || 0);
-          const totalPrice = (price + priceTax).toFixed(2);
-
-          prod.Id = product.Id;
-          prod.Name = product.Name;
-          prod.Price = totalPrice;
-
-          orderList.order.total += Number(totalPrice);
-          orderList.order.totalTax += Number(priceTax);
-
-          orderList.products.push(prod);
+      let [result] = await this.connection.query(query);
+      result = result[0];
+      const orderList = {
+        products: [],
+        order: {
+          total: 0,
+          totalTax: 0
         }
+      };
 
-        orderList.order.total = Number(orderList.order.total.toFixed(2));
-        orderList.order.totalTax = Number(orderList.order.totalTax.toFixed(2));
+      for (const product of result) {
+        const prod = { Id: '', Name: '', Price: '' };
+        const price = Number(product.Price || 0);
+        const priceTax = Number(product.ProductTax || 0);
+        const totalPrice = (price + priceTax).toFixed(2);
+
+        prod.Id = product.Id;
+        prod.Name = product.Name;
+        prod.Price = totalPrice;
+
+        orderList.order.total += Number(totalPrice);
+        orderList.order.totalTax += Number(priceTax);
+
+        orderList.products.push(prod);
+      }
+
+      orderList.order.total = Number(orderList.order.total.toFixed(2));
+      orderList.order.totalTax = Number(orderList.order.totalTax.toFixed(2));
+      return orderList;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async addOrder(orderListCart: any[]) {
+    try {
+      const orderList: any = await this.getListProductsInCart(orderListCart);
+
+      const query = `INSERT INTO Orders(SalesTaxes, Total) VALUES (${orderList.order.totalTax}, ${orderList.order.total})`;
+      const [resultInsert] = await this.connection.query(query);
+      const newOrderId = resultInsert.insertId;
+      try {
+        await this.addOrderList(newOrderId, orderListCart);
+        redisModelServices.set({
+          [Date.now()]: `Order with id ${newOrderId} was added`
+        });
         return orderList;
       } catch (e) {
         throw new Error(e);
       }
+    } catch (e) {
+      throw new Error(e);
     }
+  }
 
-    async addOrder (orderListCart: any[]) {
-      try {
-        const orderList:any = await this.getListProductsInCart(orderListCart);
-
-        const query = `INSERT INTO Orders(SalesTaxes, Total) VALUES (${orderList.order.totalTax}, ${orderList.order.total})`;
-        const [resultInsert] = await this.connection.query(query);
-        const newOrderId = resultInsert.insertId;
-        try {
-          await this.addOrderList(newOrderId, orderListCart);
-          return orderList;
-        } catch (e) {
-          throw new Error(e);
-        }
-      } catch (e) {
-        throw new Error(e);
+  async addOrderList(newOrderId, orderListCart) {
+    try {
+      const orderListId = [];
+      for (const productId in orderListCart) {
+        orderListId.push([newOrderId, productId, orderListCart[productId]]);
       }
+      const query = 'INSERT INTO OrderList (OrderId, ProductId, Quantity) VALUES ?';
+      return await this.connection.query(query, [orderListId]);
+    } catch (e) {
+      throw new Error(e);
     }
+  }
 
-    async addOrderList (newOrderId, orderListCart) {
-      try {
-        const orderListId = [];
-        for (const productId in orderListCart) {
-          orderListId.push([newOrderId, productId, orderListCart[productId]]);
-        }
-        const query = 'INSERT INTO OrderList (OrderId, ProductId, Quantity) VALUES ?';
-        return await this.connection.query(query, [orderListId]);
-      } catch (e) {
-        throw new Error(e);
+  async getOrderList(): Promise<object> {
+    try {
+      const query = 'SELECT * FROM Orders';
+      const [orderList] = await this.connection.query(query);
+      for (let i = 0; i < orderList.length; i++) {
+        orderList[i].Date = getFormatDate(orderList[i].Date);
       }
+      return orderList;
+    } catch (e) {
+      throw new Error(e);
     }
+  }
 
-    async getOrderList (): Promise<object> {
-      try {
-        const query = 'SELECT * FROM Orders';
-        const [orderList] = await this.connection.query(query);
-        for (let i = 0; i < orderList.length; i++) {
-          orderList[i].Date = getFormatDate(orderList[i].Date);
-        }
-        return orderList;
-      } catch (e) {
-        throw new Error(e);
-      }
+  async deleteOrder(OrderId: number): Promise<number> {
+    try {
+      const query = 'DELETE FROM Orders WHERE id=?';
+      redisModelServices.set({
+        [Date.now()]: `Order with id ${OrderId} was deleted`
+      });
+      return await this.connection.query(query, OrderId);
+    } catch (e) {
+      throw new Error(e);
     }
-
-    async deleteOrder (OrderId: number): Promise<number> {
-      try {
-        const query = 'DELETE FROM Orders WHERE id=?';
-        return await this.connection.query(query, OrderId);
-      } catch (e) {
-        throw new Error(e);
-      }
-    }
-}
-
-function getFormatDate (date) {
-  return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  }
 }
 
 export = CartModelServices;

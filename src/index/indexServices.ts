@@ -4,11 +4,11 @@ import { Request, Response } from 'express';
 
 class IndexServices {
   // eslint-disable-next-line no-useless-constructor
-  constructor () {
+  constructor() {
 
   }
 
-  getHomePage (req: Request, res: Response) {
+  getHomePage(req: Request, res: Response) {
     res.render('index', { title: 'Express' });
   }
 }

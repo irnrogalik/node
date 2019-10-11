@@ -8,11 +8,11 @@ const ProductModelServices = new ProductModelServicesClass(config.dbConnection);
 
 class ProductServices {
   // eslint-disable-next-line no-useless-constructor
-  constructor () {
+  constructor() {
 
   }
 
-  async getListProducts (req: Request, res: Response) {
+  async getListProducts(req: Request, res: Response) {
     try {
       const products = await ProductModelServices.getListProducts();
       res.render('listProducts', {
@@ -24,7 +24,7 @@ class ProductServices {
     }
   }
 
-  async showAddProductPage (req: Request, res: Response) {
+  async showAddProductPage(req: Request, res: Response) {
     try {
       const categories = await ProductModelServices.getListCategories();
       res.render('addProduct', {
@@ -36,18 +36,17 @@ class ProductServices {
     }
   }
 
-  async addProduct (req: Request, res: Response) {
+  async addProduct(req: Request, res: Response) {
     if (!req.body) return res.sendStatus(400);
     let { name, price, category } = req.body || null;
-    // const name = req.body.name;
-    // const price = req.body.price || null;
-    // let category = req.body.category || null;
+
+    console.log('category   _____ ', category);
 
     if (category != null && !Array.isArray(category)) {
       category = [category];
     }
     try {
-      const insertProductId = +await ProductModelServices.addProduct([name, price]);
+      const insertProductId = Number(await ProductModelServices.addProduct([name, price]));
       if (category && insertProductId) {
         const categoryProduct = [];
         for (let i = 0; i < category.length; i++) {
@@ -60,13 +59,15 @@ class ProductServices {
         } finally {
           res.redirect('/products');
         }
+      } else {
+        res.redirect('/products');
       }
     } catch (e) {
       res.send(e);
     }
   }
 
-  async deleteProduct (req: Request, res: Response) {
+  async deleteProduct(req: Request, res: Response) {
     const categoryId = Number(req.params.id);
     try {
       await ProductModelServices.deleteProduct(categoryId);
@@ -76,7 +77,7 @@ class ProductServices {
     }
   }
 
-  addToCart (req: Request, res: Response) {
+  addToCart(req: Request, res: Response) {
     const id = req.params.id;
     req.session.orderList = req.session.orderList || {};
     req.session.orderList[id] = req.session.orderList[id] ? req.session.orderList[id] + 1 : 1;

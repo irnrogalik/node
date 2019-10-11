@@ -1,15 +1,17 @@
 'user strict';
 import mysql from 'mysql2';
+import { RedisModelServices } from '../redis/RedisModelServices';
+const redisModelServices = new RedisModelServices(6379);
 
 class ProductModelServices {
   private connection: mysql.Socket;
 
-  constructor (connectionConfig: Object) {
+  constructor(connectionConfig: Object) {
     this.connection = mysql.createPool(connectionConfig);
     this.connection = this.connection.promise();
   }
 
-  async getListProducts () {
+  async getListProducts() {
     // const query = `SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products
     // LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
     // LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id
@@ -24,7 +26,7 @@ class ProductModelServices {
     }
   }
 
-  async getListCategories () {
+  async getListCategories() {
     const query = 'SELECT * FROM Categories';
     try {
       const [categories] = await this.connection.query(query);
@@ -34,17 +36,25 @@ class ProductModelServices {
     }
   }
 
-  async addProduct (newProduct: any[]) {
+  async addProduct(newProduct: any[]) {
+    /**
+     * *** не добавляет товар с пустой категорией
+     * 
+     */
     const query = 'INSERT INTO Products (Name, Price) VALUES (?,?)';
     try {
       const [insertProduct] = await this.connection.query(query, newProduct);
-      return insertProduct.insertId;
+      const insertId = insertProduct.insertId;
+      redisModelServices.set({
+        [Date.now()]: `Product with id ${insertId} was added`
+      });
+      return insertId;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addProductCategory (newProductCategory) {
+  async addProductCategory(newProductCategory) {
     const query = 'INSERT INTO ProductCategory (ProductId, CategoryId) VALUES ?';
     try {
       return await this.connection.query(query, newProductCategory);
@@ -53,21 +63,14 @@ class ProductModelServices {
     }
   }
 
-  async getTaxForProductFromCategory (category) {
-    const categories = category.join(',');
-    const query = `SELECT DISTINCT(Categories.TaxId) FROM Categories WHERE Categories.Id IN (${categories}) AND Categories.TaxId IS NOT NULL`;
-    try {
-      const [taxes] = await this.connection.query(query);
-      return taxes;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async deleteProduct (productId: number) {
+  async deleteProduct(productId: number) {
     const query = 'DELETE FROM Products WHERE id=?';
     try {
-      return await this.connection.query(query, productId);
+      await this.connection.query(query, productId);
+      redisModelServices.set({
+        [Date.now()]: `Product with id ${productId} was deleted`
+      });
+      return true;
     } catch (e) {
       throw new Error(e);
     }
