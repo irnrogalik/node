@@ -12,10 +12,6 @@ class ProductModelServices {
   }
 
   async getListProducts() {
-    // const query = `SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products
-    // LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
-    // LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id
-    // GROUP BY Products.Id, Products.Name, Products.Price;`;
     const query = 'CALL getProductsList()';
     try {
       let [productList] = await this.connection.query(query);
@@ -37,10 +33,6 @@ class ProductModelServices {
   }
 
   async addProduct(newProduct: any[]) {
-    /**
-     * *** не добавляет товар с пустой категорией
-     * 
-     */
     const query = 'INSERT INTO Products (Name, Price) VALUES (?,?)';
     try {
       const [insertProduct] = await this.connection.query(query, newProduct);
