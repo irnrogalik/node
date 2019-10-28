@@ -1,63 +1,65 @@
-'use strict';
 import mysql from 'mysql2';
+import { redis } from '../config/config';
 import { RedisModelServices } from '../redis/RedisModelServices';
-const redisModelServices = new RedisModelServices(6379);
+import { Category } from '../interfaces/Category';
+import { DB_MYSQL, ResultQuery } from '../interfaces/DB';
+import { Tax } from '../interfaces/Tax';
 
-class CategoryModelServices {
+const redisModelServices: RedisModelServices = new RedisModelServices(redis);
+
+export class CategoryModelServices {
   private connection: mysql.Socket;
+  private categories: Category[];
+  private query: string;
+  private message: string;
 
-  constructor(connectionConfig: Object) {
-    this.connection = mysql.createPool(connectionConfig);
-    this.connection = this.connection.promise();
+  constructor(connectionConfig: DB_MYSQL) {
+    this.connection = mysql.createPool(connectionConfig).promise();
   }
 
-  async getListCategories() {
+  async getCategoriesList(): Promise<Category[]> {
     try {
-      const query = `SELECT Categories.Id, Categories.Name, Taxes.Name as TaxName FROM Categories 
-      LEFT JOIN Taxes ON Categories.TaxId = Taxes.Id 
-      ORDER BY Categories.Id`;
-      const [categories] = await this.connection.query(query);
+      this.query = `SELECT categories.id, categories.name, taxes.name as taxName FROM categories 
+      LEFT JOIN taxes ON categories.taxId = taxes.Id 
+      ORDER BY categories.id`;
+      [ this.categories ] = await this.connection.query(this.query);
+      return this.categories;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async getOnlyCategoriesList(): Promise<Category[]> {
+    this.query = 'SELECT * FROM categories';
+    try {
+      const [ categories ]: [ Category[] ] = await this.connection.query(this.query);
       return categories;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async getListTaxes() {
+  async addCategory(newCategory: Category): Promise<string> {
     try {
-      const query = 'SELECT * FROM getTaxes';
-      const [taxes] = await this.connection.query(query);
-      return taxes;
+      this.query = 'INSERT INTO categories (name, taxId) VALUES (?,?)';
+      const insertCategory: ResultQuery = await this.connection.query(this.query, [ newCategory.name, newCategory.taxId ]);
+      this.message = `Category with id ${ insertCategory[ 0 ].insertId } was added`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addCategory(newCategory: any[]) {
+  async deleteCategory(categoryId: Category[ 'id' ]): Promise<string> {
     try {
-      const query = 'INSERT INTO Categories (name, taxId) VALUES (?,?)';
-      const insertCategory = await this.connection.query(query, newCategory);
-      const insertCategoryId = insertCategory.insertId;
-      redisModelServices.set({
-        [Date.now()]: `Category with id ${insertCategoryId} was added`
-      });
-      return insertCategoryId;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async deleteCategory(categotyId: number) {
-    try {
-      const query = 'DELETE FROM Categories WHERE id=?';
-      redisModelServices.set({
-        [Date.now()]: `Category with id ${categotyId} was deleted`
-      });
-      return await this.connection.query(query, categotyId);
+      this.query = 'DELETE FROM categories WHERE id=?';
+      await this.connection.query(this.query, categoryId);
+      this.message = `Category with id ${ categoryId } was deleted`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
     } catch (e) {
       throw new Error(e);
     }
   }
 }
-
-export default CategoryModelServices;

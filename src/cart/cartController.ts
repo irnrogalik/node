@@ -1,20 +1,53 @@
-'use strict';
-import express from 'express';
-import CartServicesClass from './cartServices';
+import { Request, Response } from 'express';
+import { dbConnection } from '../config/config';
+import { Cart, Order, OrderResult } from '../interfaces/Cart';
+import { setResponse, setResponseError } from '../lib/functions';
+import { CartModelServices } from './cartModelServices';
 
-const CartServices = new CartServicesClass();
-const router = express.Router();
+const cartModelServices: CartModelServices = new CartModelServices(dbConnection);
 
-router.route('/')
-  .get(CartServices.getListProductsInCart);
+export class CartServices {
+  constructor() { }
 
-router.route('/order')
-  .post(CartServices.addOrder);
+  async getListProductsInCart(req: Request, res: Response): Promise<void> {
+    const orderListCart: object = req.body;
+    if (orderListCart) {
+      try {
+        const products: Cart = await cartModelServices.getListProductsInCart(orderListCart);
+        res.json(products);
+      } catch (e) {
+        res.json(setResponseError(e));
+      }
+    } else {
+      res.json(setResponse('cart is empty'));
+    }
+  }
 
-router.route('/delete/:id')
-  .post(CartServices.deleteOrder);
+  async addOrder(req: Request, res: Response): Promise<void> {
+    if (!req.body) res.json(setResponse('no data', 400));
+    const orderListCart: { [ key: number ]: number } = req.body;
+    try {
+      const orderResult: OrderResult = await cartModelServices.addOrder(orderListCart);
+      res.json(orderResult);
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
 
-router.route('/orderList')
-  .get(CartServices.getOrderList);
+  async getOrderList(req: Request, res: Response): Promise<void> {
+    try {
+      res.json(await cartModelServices.getOrderList());
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
 
-export = router;
+  async deleteOrder(req: Request, res: Response): Promise<void> {
+    const orderId: Order[ 'id' ] = Number(req.params.id);
+    try {
+      res.json(setResponse(await cartModelServices.deleteOrder(orderId)));
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
+}

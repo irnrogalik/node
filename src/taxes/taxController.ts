@@ -1,18 +1,46 @@
-'use strict';
-import express from 'express';
-import TaxServicesClass from './taxServices';
+import { Request, Response } from 'express';
+import { dbConnection } from '../config/config';
+import { TaxModelServices } from './taxModelServices';
+import { setResponse, setResponseError } from '../lib/functions';
+import { Tax } from '../interfaces/Tax';
 
-const router = express.Router();
-const TaxServices = new TaxServicesClass();
+const TaxModel: TaxModelServices = new TaxModelServices(dbConnection);
 
-router.route('/')
-  .get(TaxServices.getListTax);
+export class TaxServices {
+  constructor() { }
 
-router.route('/add')
-  .get(TaxServices.showAddTaxPage)
-  .post(TaxServices.addTax);
+  async getTaxesList(req: Request, res: Response): Promise<void> {
+    try {
+      res.json(await TaxModel.getTaxesList());
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
 
-router.route('/delete/:id')
-  .post(TaxServices.deleteTax);
+  async getOnlyTaxesList(req: Request, res: Response): Promise<void> {
+    try {
+      res.json(await TaxModel.getOnlyTaxesList());
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
 
-export = router;
+  async addTax(req: Request, res: Response): Promise<void> {
+    if (!req.body) res.json(setResponse('no data', 400));
+    const newTax: Tax = req.body;
+    try {
+      res.json(setResponse(await TaxModel.addTax(newTax)));
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
+
+  async deleteTax(req: Request, res: Response): Promise<void> {
+    const taxId: Tax[ 'id' ] = Number(req.params.id);
+    try {
+      res.json(setResponse(await TaxModel.deleteTax(taxId)));
+    } catch (e) {
+      res.json(setResponseError(e));
+    }
+  }
+}

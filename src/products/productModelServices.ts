@@ -1,72 +1,63 @@
-'user strict';
+import { Category } from '../interfaces/Category';
+import { DB_MYSQL, ResultQuery } from '../interfaces/DB';
+import { Product } from '../interfaces/Product';
 import mysql from 'mysql2';
 import { RedisModelServices } from '../redis/RedisModelServices';
-const redisModelServices = new RedisModelServices(6379);
+import { redis } from '../config/config';
 
-class ProductModelServices {
+const redisModelServices = new RedisModelServices(redis);
+
+export class ProductModelServices {
   private connection: mysql.Socket;
+  private products: Product[];
+  private query: string;
+  private message: string;
 
-  constructor(connectionConfig: Object) {
-    this.connection = mysql.createPool(connectionConfig);
-    this.connection = this.connection.promise();
+  constructor(connectionConfig: DB_MYSQL) {
+    this.connection = mysql.createPool(connectionConfig).promise();
   }
 
-  async getListProducts() {
-    const query = 'CALL getProductsList()';
+  async getProductsList(): Promise<Product[]> {
+    this.query = 'CALL getProductsList()';
     try {
-      let [productList] = await this.connection.query(query);
-      productList = productList[0];
-      return productList;
+      [ [ this.products ] ] = await this.connection.query(this.query);
+      return this.products;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async getListCategories() {
-    const query = 'SELECT * FROM Categories';
+  async addProduct(newProduct: Product): Promise<{ message: string, insertId: number }> {
+    this.query = 'INSERT INTO products (name, price) VALUES (?,?)';
     try {
-      const [categories] = await this.connection.query(query);
-      return categories;
+      const insertProduct: ResultQuery = await this.connection.query(this.query, [ newProduct.name, newProduct.price ]);
+      const insertId = insertProduct[ 0 ].insertId;
+      this.message = `Product with id ${ insertId } was added`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return { message: this.message, insertId };
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addProduct(newProduct: any[]) {
-    const query = 'INSERT INTO Products (Name, Price) VALUES (?,?)';
+  async addProductCategory(newProductCategory: [ [ number, number ][] ]) {
+    this.query = 'INSERT INTO productCategory (productId, categoryId) VALUES ?';
     try {
-      const [insertProduct] = await this.connection.query(query, newProduct);
-      const insertId = insertProduct.insertId;
-      redisModelServices.set({
-        [Date.now()]: `Product with id ${insertId} was added`
-      });
-      return insertId;
+      return await this.connection.query(this.query, newProductCategory);
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addProductCategory(newProductCategory) {
-    const query = 'INSERT INTO ProductCategory (ProductId, CategoryId) VALUES ?';
+  async deleteProduct(productId: Product[ 'id' ]): Promise<string> {
+    this.query = 'DELETE FROM products WHERE id=?';
     try {
-      return await this.connection.query(query, newProductCategory);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async deleteProduct(productId: number) {
-    const query = 'DELETE FROM Products WHERE id=?';
-    try {
-      await this.connection.query(query, productId);
-      redisModelServices.set({
-        [Date.now()]: `Product with id ${productId} was deleted`
-      });
-      return true;
+      await this.connection.query(this.query, productId);
+      this.message = `Product with id ${ productId } was deleted`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
     } catch (e) {
       throw new Error(e);
     }
   }
 }
-
-export default ProductModelServices;

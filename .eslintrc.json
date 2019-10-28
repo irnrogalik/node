@@ -4,9 +4,7 @@
     "es6": true,
     "node": true
   },
-  "extends": [
-    "standard"
-  ],
+  "extends": ["standard"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -16,21 +14,24 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
-    "linebreak-style": [
+    "linebreak-style": ["error", "windows"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "space-before-function-paren": [
       "error",
-      "unix"
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
     ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
+    "array-bracket-spacing": ["error", "always", { "objectsInArrays": false }],
+    "template-curly-spacing": ["error", "always"],
+    "computed-property-spacing": ["error", "always"],
+    "no-return-await": 0,
+    "no-useless-constructor": 0
+    // "no-unused-vars": 0
   }
 }

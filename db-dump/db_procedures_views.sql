@@ -1,14 +1,14 @@
 -- create storage procedures
 DELIMITER $$
-CREATE PROCEDURE getProductsListInCart(IN idList NVARCHAR(100))
+CREATE PROCEDURE getproductsListInCart(IN idList NVARCHAR(100))
 BEGIN
 	SET @sql = CONCAT('
-        SELECT Products.Id, Products.Name, Products.Price, SUM(Products.Price * (Taxes.Value / 100)) as ProductTax
-        FROM Products
-            LEFT JOIN ProductTaxes on Products.Id = ProductTaxes.ProductId
-            LEFT JOIN Taxes on ProductTaxes.TaxId = Taxes.Id
-        WHERE Products.Id IN (', idList, ')
-        GROUP BY Products.Id, Products.Name');
+        SELECT products.id, products.name, products.price, SUM(products.price * (taxes.value / 100)) as productTax
+        FROM products
+            LEFT JOIN productTaxes on products.id = productTaxes.productId
+            LEFT JOIN taxes on productTaxes.taxId = taxes.id
+        WHERE products.id IN (', idList, ')
+        GROUP BY products.id, products.name');
 
     PREPARE stmt FROM @sql;
 	EXECUTE stmt;
@@ -17,14 +17,14 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE getProductsList ()
+CREATE PROCEDURE getproductsList ()
 BEGIN
-	SELECT Products.Id, Products.Name, Products.Price, GROUP_CONCAT(Categories.Name) as CategoryName FROM Products
-		LEFT JOIN ProductCategory ON Products.Id = ProductCategory.ProductId
-		LEFT JOIN Categories on ProductCategory.CategoryId = Categories.Id
-	GROUP BY Products.Id, Products.Name, Products.Price;
+	SELECT products.id, products.name, products.price, GROUP_CONCAT(categories.name) as categoryName FROM products
+		LEFT JOIN productCategory ON products.id = productCategory.productId
+		LEFT JOIN categories on productCategory.categoryId = categories.id
+	GROUP BY products.id, products.name, products.price;
 END$$
 DELIMITER ;
 
 -- create views
-CREATE VIEW getTaxes AS select Id, Name from Taxes;
+CREATE VIEW getTaxes AS select id, name from taxes;

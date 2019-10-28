@@ -1,33 +1,25 @@
-'use strict';
 import express from 'express';
+import { redis } from '../config/config';
+import { DisplayRedisObject, RedisObject } from '../interfaces/DB';
 import { getFormatDate } from '../lib/functions';
 import { RedisModelServices } from './RedisModelServices';
 
-const router = express.Router();
-const redisModelServices = new RedisModelServices(6379);
+const router: express.Router = express.Router();
+const redisModelServices: RedisModelServices = new RedisModelServices(redis);
 
-router.route('/').get(async (req, res) => {
-  const logs_ = await redisModelServices.get();
-  const logs = [];
+router.route('/').get(async (req: express.Request, res: express.Response) => {
+  const logs_: RedisObject<string>[] = await redisModelServices.get();
+  const logs: DisplayRedisObject[] = [];
 
   for (const date in logs_) {
-    logs.push({
-      date: getFormatDate(new Date(Number(date))),
-      log: logs_[date]
-    });
+    logs.push({ date: getFormatDate(new Date(Number(date))), descriptionLog: logs_[ date ] });
   }
-  res.render('log', { logs });
+  res.json(logs);
 });
 
-router.route('/get').get(async (req, res) => {
-  const result = await redisModelServices.get();
-  res.send(result);
+router.route('/flush').get((req: express.Request, res: express.Response) => {
+  const resultOfFlush: Promise<Boolean> = redisModelServices.flush();
+  res.json({ resultFlush: resultOfFlush ? 'Log was deleted' : 'Something wrong. Try again' });
 });
 
-router.route('/flush').get((req, res) => {
-  const resultOfFlush = redisModelServices.flush();
-  res.render('log', {
-    result_flush: resultOfFlush ? 'Log is empty' : 'Something wrong. Try again'
-  });
-});
 export = router;

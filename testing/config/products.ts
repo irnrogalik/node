@@ -1,6 +1,18 @@
-'use strict';
+import { OrderAmount } from '../../src/interfaces/Cart';
+import { Product } from '../../src/interfaces/Product';
 
-const productsConfig = {
+interface CartForTest {
+  [ key: string ]: CartContent
+}
+
+export interface CartContent {
+  products: {
+    [ key: number ]: Product
+  },
+  order: OrderAmount
+}
+
+export const productsConfig: CartForTest = {
   set1: {
     products: {
       // Product with id = 1 and starting price 16.00
@@ -20,7 +32,7 @@ const productsConfig = {
       }
     },
     order: {
-      salesTaxes: 10.00,
+      totalTax: 10.00,
       total: 126.98
     }
   },
@@ -38,7 +50,7 @@ const productsConfig = {
       }
     },
     order: {
-      salesTaxes: 2250.74,
+      totalTax: 2250.74,
       total: 17262.99
     }
   },
@@ -66,11 +78,9 @@ const productsConfig = {
       }
     },
     order: {
-      salesTaxes: 10.8,
+      totalTax: 10.8,
       total: 1149.78
     }
   }
-
 };
 
-module.exports = productsConfig;

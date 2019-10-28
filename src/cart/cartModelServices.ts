@@ -1,24 +1,30 @@
-'user strict';
 import mysql from 'mysql2';
+import { redis } from '../config/config';
+import { Cart, Order, OrderResult } from '../interfaces/Cart';
 import { getFormatDate } from '../lib/functions';
 import { RedisModelServices } from '../redis/RedisModelServices';
-const redisModelServices = new RedisModelServices(6379);
+import { ResultQuery } from '../interfaces/DB';
+import { Product } from '../interfaces/Product';
 
-class CartModelServices {
+const redisModelServices: RedisModelServices = new RedisModelServices(redis);
+
+export class CartModelServices {
   private connection: mysql.Socket;
+  private query: string;
+  private message: string;
+  private orderListInCart: Cart;
+  private orderList: Order[];
+  private products: Product[];
 
   constructor(connectionConfig: Object) {
-    this.connection = mysql.createConnection(connectionConfig);
-    this.connection = this.connection.promise();
+    this.connection = mysql.createConnection(connectionConfig).promise();
   }
 
-  async getListProductsInCart(orderListCart: any[]): Promise<object> {
+  async getListProductsInCart(orderListCart: object): Promise<Cart> {
     try {
-      const query = `CALL getProductsListInCart('${Object.keys(orderListCart).join(',')}')`;
-
-      let [result] = await this.connection.query(query);
-      result = result[0];
-      const orderList = {
+      this.query = `CALL getProductsListInCart('${ Object.keys(orderListCart).join(',') }')`;
+      [ [ this.products ] ] = await this.connection.query(this.query);
+      this.orderListInCart = {
         products: [],
         order: {
           total: 0,
@@ -26,43 +32,42 @@ class CartModelServices {
         }
       };
 
-      for (const product of result) {
-        const prod = { Id: '', Name: '', Price: '' };
-        const price = Number(product.Price || 0);
-        const priceTax = Number(product.ProductTax || 0);
-        const totalPrice = (price + priceTax).toFixed(2);
+      for (const product of this.products) {
+        const price = Number(product.price || 0);
+        const priceTax = Number(product.productTax || 0);
+        const totalPrice = Number((price + priceTax).toFixed(2));
 
-        prod.Id = product.Id;
-        prod.Name = product.Name;
-        prod.Price = totalPrice;
+        product.price = totalPrice;
 
-        orderList.order.total += Number(totalPrice);
-        orderList.order.totalTax += Number(priceTax);
-
-        orderList.products.push(prod);
+        this.orderListInCart.order.total += totalPrice;
+        this.orderListInCart.order.totalTax += priceTax;
+        this.orderListInCart.products.push(product);
       }
 
-      orderList.order.total = Number(orderList.order.total.toFixed(2));
-      orderList.order.totalTax = Number(orderList.order.totalTax.toFixed(2));
-      return orderList;
+      this.orderListInCart.order.total = Number(this.orderListInCart.order.total.toFixed(2));
+      this.orderListInCart.order.totalTax = Number(this.orderListInCart.order.totalTax.toFixed(2));
+
+      return this.orderListInCart;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addOrder(orderListCart: any[]) {
+  async addOrder(orderListCart: { [ key: number ]: number }): Promise<OrderResult> {
     try {
-      const orderList: any = await this.getListProductsInCart(orderListCart);
-
-      const query = `INSERT INTO Orders(SalesTaxes, Total) VALUES (${orderList.order.totalTax}, ${orderList.order.total})`;
-      const [resultInsert] = await this.connection.query(query);
-      const newOrderId = resultInsert.insertId;
+      const orderList: Cart = await this.getListProductsInCart(orderListCart);
+      this.query = `INSERT INTO orders(salesTaxes, total) VALUES (${ orderList.order.totalTax }, ${ orderList.order.total })`;
+      const [ resultInsert ]: ResultQuery[] = await this.connection.query(this.query);
+      const newOrderId: ResultQuery[ 'insertId' ] = resultInsert.insertId;
       try {
-        await this.addOrderList(newOrderId, orderListCart);
-        redisModelServices.set({
-          [Date.now()]: `Order with id ${newOrderId} was added`
-        });
-        return orderList;
+        this.addOrderList(newOrderId, orderListCart);
+        redisModelServices.set({ [ Date.now() ]: `Order with id ${ newOrderId } was added` });
+        const orderResult: OrderResult = {
+          status: 200,
+          message: `Order #${ newOrderId }  completed 12`,
+          orderList: orderList
+        };
+        return orderResult;
       } catch (e) {
         throw new Error(e);
       }
@@ -71,14 +76,14 @@ class CartModelServices {
     }
   }
 
-  async addOrderList(newOrderId, orderListCart) {
+  async addOrderList(newOrderId: number, orderListCart: object): Promise<void> {
     try {
       const orderListId = [];
       for (const productId in orderListCart) {
-        orderListId.push([newOrderId, productId, orderListCart[productId]]);
+        orderListId.push([ newOrderId, productId, orderListCart[ productId ] ]);
       }
-      const query = 'INSERT INTO OrderList (OrderId, ProductId, Quantity) VALUES ?';
-      return await this.connection.query(query, [orderListId]);
+      this.query = 'INSERT INTO orderList (orderId, productId, quantity) VALUES ?';
+      this.connection.query(this.query, [ orderListId ]);
     } catch (e) {
       throw new Error(e);
     }
@@ -86,28 +91,26 @@ class CartModelServices {
 
   async getOrderList(): Promise<object> {
     try {
-      const query = 'SELECT * FROM Orders';
-      const [orderList] = await this.connection.query(query);
-      for (let i = 0; i < orderList.length; i++) {
-        orderList[i].Date = getFormatDate(orderList[i].Date);
+      this.query = 'SELECT * FROM orders';
+      [ this.orderList ] = await this.connection.query(this.query);
+      for (let i = 0; i < this.orderList.length; i++) {
+        this.orderList[ i ].displayDate = getFormatDate(this.orderList[ i ].date);
       }
-      return orderList;
+      return this.orderList;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async deleteOrder(OrderId: number): Promise<number> {
+  async deleteOrder(OrderId: Order[ 'id' ]): Promise<string> {
     try {
-      const query = 'DELETE FROM Orders WHERE id=?';
-      redisModelServices.set({
-        [Date.now()]: `Order with id ${OrderId} was deleted`
-      });
-      return await this.connection.query(query, OrderId);
+      this.query = 'DELETE FROM orders WHERE id=?';
+      await this.connection.query(this.query, OrderId);
+      this.message = `Order with id ${ OrderId } was deleted`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
     } catch (e) {
       throw new Error(e);
     }
   }
 }
-
-export = CartModelServices;

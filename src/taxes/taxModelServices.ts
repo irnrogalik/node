@@ -1,51 +1,62 @@
-'user strict';
 import mysql from 'mysql2';
+import { redis } from '../config/config';
+import { DB_MYSQL, ResultQuery } from '../interfaces/DB';
+import { Tax } from '../interfaces/Tax';
 import { RedisModelServices } from '../redis/RedisModelServices';
-const redisModelServices = new RedisModelServices(6379);
 
-class TaxModelServices {
+const redisModelServices: RedisModelServices = new RedisModelServices(redis);
+
+export class TaxModelServices {
   private connection: mysql.Socket;
+  query: string;
+  message: string;
+  taxes: Tax[];
 
-  constructor(connectionConfig: Object) {
-    this.connection = mysql.createPool(connectionConfig);
-    this.connection = this.connection.promise();
+  constructor(connectionConfig: DB_MYSQL) {
+    this.connection = mysql.createPool(connectionConfig).promise();
   }
 
-  async getListTax(): Promise<object> {
-    const query = 'SELECT * FROM Taxes';
+  async getTaxesList(): Promise<Tax[]> {
+    this.query = 'SELECT * FROM taxes';
     try {
-      const result = await this.connection.query(query);
-      return result[0]; // list of rows
+      [ this.taxes ] = await this.connection.query(this.query);
+      return this.taxes;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async addTax(newTax: any[]): Promise<boolean> {
-    const query = 'INSERT INTO Taxes (name, value, description) VALUES (?,?,?)';
+  async getOnlyTaxesList(): Promise<Tax[]> {
     try {
-      const insertTax = await this.connection.query(query, newTax);
-      const insertTaxId = insertTax.insertId;
-      redisModelServices.set({
-        [Date.now()]: `Tax with id ${insertTaxId} was added`
-      });
-      return insertTaxId;
+      this.query = 'SELECT * FROM getTaxes';
+      [ this.taxes ] = await this.connection.query(this.query);
+      return this.taxes;
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async deleteTax(taxId: number): Promise<boolean> {
-    const query = 'DELETE FROM Taxes WHERE id=?';
+  async addTax(newTax: Tax): Promise<string> {
+    this.query = 'INSERT INTO taxes (name, value, description) VALUES (?,?,?)';
     try {
-      redisModelServices.set({
-        [Date.now()]: `Tax with id ${taxId} was deleted`
-      });
-      return await this.connection.query(query, taxId);
+      const insertTax: ResultQuery = await this.connection.query(this.query, [ newTax.name, newTax.value, newTax.description ]);
+      this.message = `Tax with id ${ insertTax[ 0 ].insertId } was added`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async deleteTax(taxId: Tax[ 'id' ]): Promise<string> {
+    this.query = 'DELETE FROM taxes WHERE id=?';
+    try {
+      await this.connection.query(this.query, taxId);
+      this.message = `Tax with id ${ taxId } was deleted`;
+      redisModelServices.set({ [ Date.now() ]: this.message });
+      return this.message;
     } catch (e) {
       throw new Error(e);
     }
   }
 }
-
-export default TaxModelServices;

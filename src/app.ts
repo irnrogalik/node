@@ -1,63 +1,58 @@
-﻿'use strict';
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import createError from 'http-errors';
-import session from 'express-session';
-import path from 'path';
-import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-
-import taxesRouter from './taxes/taxController';
-import categoriesRouter from './categories/categoryController';
-import productsRouter from './products/productController';
-import cartRouter from './cart/cartController';
-import indexRouter from './index/indexController';
+import path from 'path';
+import cartRouter from './cart/cartRoutes';
+import categoriesRouter from './categories/categoryRoutes';
+import { initApp } from './config/config';
+import productsRouter from './products/productRoutes';
 import redisRouter from './redis/redisController';
+import taxesRouter from './taxes/taxRoutes';
 
-const port = 3010;
 const app = express();
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+const headers: object = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': ' GET, POST, PATCH, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  'Content-Type': 'application/json'
+};
 
 app.use(logger('dev'))
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
   .use(cookieParser())
-  .use(express.static(path.join(__dirname, 'public')))
-  .use(session({
-    resave: false,
-    saveUninitialized: false,
-    secret: 'test task'
-  }));
+  .use(express.static(path.join(__dirname, 'public')));
+
+app.use(function (req, res, next) {
+  res.set(headers);
+  next();
+});
 
 app.use('/taxes', taxesRouter);
 app.use('/categories', categoriesRouter);
 app.use('/products', productsRouter);
 app.use('/cart', cartRouter);
-app.use('/', indexRouter);
 app.use('/log', redisRouter);
-
-app.get('/', (req, res) => {
-  res.send('Index page');
-});
 
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-app.use(function (err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use(function (e, req, res, next) {
+  res.locals.message = e.message;
+  res.locals.error = req.app.get('env') === 'development' ? e : {};
 
-  res.status(err.status || 500);
+  res.status(e.status || 500);
   res.render('error');
 });
 
-app.listen(port, err => {
+app.listen(initApp.port, initApp.host, err => {
   if (err) {
     return console.error(err);
   }
-  return console.log(`server is listening on ${port}`);
+  return console.log(`server is listening on ${ initApp.port } `);
 });
 
 export = app;
