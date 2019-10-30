@@ -1,0 +1,24 @@
+<div class="alert alert-danger">
+  <p *ngIf="errors.required">{{ errors.key | titlecase }} is required field</p>
+
+  <p *ngIf="errors.maxlength">
+    {{ errors.key | titlecase }} should be a
+    {{ errors.maxlength.requiredLength }} max but you have a
+    {{ errors.maxlength.actualLength }}
+  </p>
+  <p *ngIf="errors.minlength">
+    {{ errors.key | titlecase }} should be a
+    {{ errors.maxlength.requiredLength }} min but you have a
+    {{ errors.maxlength.actualLength }}
+  </p>
+  <p *ngIf="errors.max">
+    {{ errors.key | titlecase }} should be a max {{ errors.max.max }} but you
+    have a
+    {{ errors.max.actual }}
+  </p>
+  <p *ngIf="errors.min">
+    {{ errors.key | titlecase }} should be a min {{ errors.min.min }} but you
+    have a
+    {{ errors.min.actual }}
+  </p>
+</div>

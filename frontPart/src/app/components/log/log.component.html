@@ -1,0 +1,22 @@
+<h2>Log</h2>
+<div class="col-md" *ngIf="logs?.length > 0">
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th>Date</th>
+        <th>Log</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of logs">
+        <td>{{ log.date }}</td>
+        <td>{{ log.descriptionLog }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <button (click)="deleteLog()">Delete log</button>
+</div>
+
+<p *ngIf="resultFlush">{{ resultFlush }}</p>
+
+<p *ngIf="!resultFlush && (!logs || logs.length == 0)">There is no log</p>

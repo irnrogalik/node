@@ -1,0 +1,33 @@
+/* You can add global styles to this file, and also import other style files */
+.link-light,
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.link-light {
+  color: white;
+}
+
+a {
+  color: #000;
+}
+
+a.active,
+a.link-light:hover {
+  color: yellow;
+  font-weight: 700;
+}
+
+a:hover {
+  font-weight: 700;
+}
+.error {
+  color: red;
+}
+
+h2 {
+  margin-bottom: 30px;
+}

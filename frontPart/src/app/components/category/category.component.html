@@ -1,0 +1,31 @@
+<h2>Categories</h2>
+
+<p><a routerLink="/categories/add">+ add category</a></p>
+
+<app-response-server-message [response]="response">
+</app-response-server-message>
+
+<table class="table" *ngIf="categories">
+  <thead class="thead-light">
+    <tr>
+      <th>Category name</th>
+      <th>Tax name</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let category of categories">
+      <td>{{ category.name }}</td>
+      <td>{{ category.taxName }}</td>
+      <td>
+        <button
+          class="delete"
+          title="delete category"
+          (click)="deleteCategory(category)"
+        >
+          X
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

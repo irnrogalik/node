@@ -1,0 +1,42 @@
+<h2>Products</h2>
+
+<p><a routerLink="/products/add">+ add product</a></p>
+
+<app-response-server-message [response]="response">
+</app-response-server-message>
+
+<table class="table" *ngIf="products">
+  <thead class="thead-light">
+    <tr>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Category</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let product of products">
+      <td>{{ product.name }}</td>
+      <td>{{ product.price }}</td>
+      <td>{{ product.categoryName }}</td>
+      <td>
+        <span
+          class="inCart"
+          *ngIf="productsInCartIds[product.id]; else addToCartButton"
+          >In <a routerLink="/cart/">cart</a></span
+        >
+        <ng-template #addToCartButton>
+          <button (click)="addProductInCart(product.id)">
+            Add to Cart
+          </button>
+        </ng-template>
+      </td>
+      <td>
+        <button title="delete product" (click)="deleteProduct(product)">
+          X
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,9 @@
+<div class="responseMessage">
+  <p
+    *ngIf="response"
+    class="alert"
+    [ngClass]="ngClassForMessage(response.status)"
+  >
+    {{ response.message }}
+  </p>
+</div>

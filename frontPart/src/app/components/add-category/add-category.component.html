@@ -1,0 +1,29 @@
+<h2>Add category</h2>
+
+<app-response-server-message [response]="response">
+</app-response-server-message>
+
+<div class="col-md-6">
+  <form [formGroup]="addCategoryForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Name</label>
+      <input class="form-control" formControlName="name" required />
+      <app-validation-errors
+        *ngIf="errors && errors.name"
+        [errors]="errors.name"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group" *ngIf="taxes">
+      <label>Tax</label>
+      <select class="form-control" formControlName="taxId">
+        <option *ngFor="let tax of taxes" [value]="tax.id">
+          {{ tax.name }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-secondary">Save</button>
+    </div>
+    <button class="btn btn-secondary" (click)="goBack()">go back</button>
+  </form>
+</div>

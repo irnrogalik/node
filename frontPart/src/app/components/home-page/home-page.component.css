@@ -1,0 +1,15 @@
+li {
+  display: block;
+  border: 1px solid;
+  padding: 20px 0;
+  margin-right: 15px;
+  background: rgb(8, 83, 112);
+  float: left;
+  max-width: 15%;
+  text-align: center;
+}
+
+.list,
+ul {
+  margin-top: 40px;
+}

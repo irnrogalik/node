@@ -1,0 +1,35 @@
+<h2>Order List</h2>
+<app-response-server-message
+  [response]="response"
+></app-response-server-message>
+<div *ngIf="orders">
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Sales taxes</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>{{ order.id }}</td>
+        <td>{{ order.displayDate }}</td>
+        <td>{{ order.salesTaxes }}</td>
+        <td>{{ order.total }}</td>
+        <td>
+          <button
+            class="delete"
+            title="delete order"
+            (click)="deleteOrder(order)"
+          >
+            X
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="!orders">Order list is empty</p>
+</div>

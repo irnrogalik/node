@@ -1,0 +1,42 @@
+<h2>Add tax</h2>
+<app-response-server-message [response]="response">
+</app-response-server-message>
+<div class="col-md-6">
+  <form [formGroup]="addTaxForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Name</label>
+      <input class="form-control" formControlName="name" required />
+      <app-validation-errors
+        *ngIf="errors && errors.name"
+        [errors]="errors.name"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group">
+      <label>Value</label>
+      <input
+        type="number"
+        class="form-control"
+        formControlName="value"
+        min="1"
+        max="100"
+        required
+      />
+      <app-validation-errors
+        *ngIf="errors && errors.value"
+        [errors]="errors.value"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <input class="form-control" formControlName="description" max="50" />
+      <app-validation-errors
+        *ngIf="errors && errors.description"
+        [errors]="errors.description"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-secondary">Save</button>
+    </div>
+    <button class="btn btn-secondary" (click)="goBack()">go back</button>
+  </form>
+</div>

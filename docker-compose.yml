@@ -1,13 +1,36 @@
-version: '3.1'
+version: "3.1"
 
 services:
+  server-back:
+    container_name: server-for-test-task
+    build:
+      context: ./server/docker
+      dockerfile: Dockerfile
+    tty: true
+    restart: on-failure
+    volumes:
+      - ./server:/app
+      - /server/node_modules
+    working_dir: /app
+    command: npm run start
+    ports:
+      - 3010:3000
+      - 9228:9229
+    environment:
+      - PORT=3010
+    links:
+      - db:db
+      - redis:redis
+    depends_on:
+      - db
+      - redis
   db:
-    image: mysql:5.7.22
+    image: mysql:5.7.28
     container_name: mysql-for-test-task
-    command: --default-authentication-plugin=mysql_native_password
+    # command: --default-authentication-plugin=mysql_native_password
     restart: always
     volumes:
-      - ./db-dump:/docker-entrypoint-initdb.d
+      - ./server/db-dump:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: test
       MYSQL_PASSWORD: test
@@ -18,7 +41,26 @@ services:
   redis:
     image: redis:4.0.5-alpine
     container_name: redis-server-for-test-task
-    command: ['redis-server', '--appendonly', 'yes']
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - 6379:6379
     restart: always
+  front:
+    container_name: front-part-for-test-task
+    restart: always
+    build:
+      context: ./frontPart/docker
+      dockerfile: Dockerfile
+    command: npm run start
+    tty: true
+    volumes:
+      - ./frontPart:/app
+      - /frontPart/node_modules
+    ports:
+      - 4200:4200
+    environment:
+      - PORT=4200
+  # links:
+  #   - server-back:server-back
+  # depends_on:
+  #   - server-back
