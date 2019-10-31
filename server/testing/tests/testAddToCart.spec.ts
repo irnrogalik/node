@@ -1,4 +1,4 @@
-import { Cart, OrderAmount } from '../../src/interfaces/Cart';
+import { Cart, OrderAmount, ProductsForCart } from '../../src/interfaces/Cart';
 import { describe, it, before } from 'mocha';
 import { expect } from 'chai';
 import { dbConnection } from '../../src/config/config';
@@ -9,11 +9,11 @@ import { Product } from '../../src/interfaces/Product';
 let cart: Cart, outputOrder: OrderAmount, outputProducts: Product[];
 
 for (const setId in productsConfig) {
-  const inputOrderList: {} = {};
+  const inputOrderList: ProductsForCart[] = [];
   const outputOrderList: CartContent = productsConfig[ setId ];
 
   Object.keys(productsConfig[ setId ].products).forEach((productId) => {
-    inputOrderList[ productId ] = 1; // create cart object with product id & quantity
+    inputOrderList.push({ id: Number(productId), quantity: 1 });
   });
 
   describe(`Check ${ setId }`, async () => {

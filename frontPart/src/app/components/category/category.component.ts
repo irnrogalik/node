@@ -28,7 +28,7 @@ export class CategoryComponent implements OnInit {
     this.categoryService.deleteCategory(category.id).subscribe((response: ResponseServer) => {
       this.response = response;
       if (response.status === 200) {
-        this.getCategories();
+        this.categories = this.categories.filter((oneCategory: Category) => oneCategory !== category);
       }
     }
     );

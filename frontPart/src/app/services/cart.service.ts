@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { Cart, OrderAmount, OrderResult } from '../interfaces/Cart';
+import { Cart, ProductsForCart, OrderResult } from '../interfaces/Cart';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,26 @@ export class CartService {
   };
 
   constructor(private http: HttpClient) { }
+
+  productIds: ProductsForCart[] = [];
+
+  addProductInCart(productId: number): void {
+    if (!this.productIds.some(product => product.id === productId)) {
+      this.productIds.push({ id: productId, quantity: 1 });
+    }
+  }
+
+  getProductInCart(): ProductsForCart[] {
+    return this.productIds;
+  }
+
+  deleteProductFromCart(productId: number): void {
+    this.productIds = this.productIds.filter(product => product.id !== productId);
+  }
+
+  clearCart(): void {
+    this.productIds = [];
+  }
 
   getProductsInCart(productIds: object): Observable<Cart> {
     return this.http.post<Cart>(`${ environment.appUrl }/${ environment.cartUrl }`, productIds, this.httpOptions);

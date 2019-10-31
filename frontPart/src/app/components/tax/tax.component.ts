@@ -28,7 +28,7 @@ export class TaxComponent implements OnInit {
     this.taxService.deleteTax(tax.id).subscribe((response: ResponseServer) => {
       this.response = response;
       if (response.status === 200) {
-        this.getTaxes();
+        this.taxes = this.taxes.filter((oneTax: Tax) => oneTax !== tax);
       }
     });
   }

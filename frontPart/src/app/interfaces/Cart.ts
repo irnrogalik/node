@@ -23,3 +23,8 @@ export interface OrderResult {
   message: string;
   orderList: Cart;
 }
+
+export interface ProductsForCart {
+  id: number;
+  quantity: number;
+}

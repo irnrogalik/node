@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
-    "start": "tsc && node dist/src/app.js",
+    "start": "tsc && node dist/server/src/app.js",
     "lint": "eslint src/**/*.ts src/*.ts testing/**/*.ts",
     "test": "mocha -r ts-node/register testing/tests/*.spec.ts --exit",
     "docker-services": "docker-compose -f docker-compose.yml up -d"

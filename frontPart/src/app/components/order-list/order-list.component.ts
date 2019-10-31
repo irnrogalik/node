@@ -29,12 +29,10 @@ export class OrderListComponent implements OnInit {
       (response: ResponseServer) => {
         this.response = response;
         if (response.status === 200) {
-          this.getOrders();
+          this.orders = this.orders.filter((oneOrder: Order) => oneOrder !== order);
         }
       }
     );
   }
-
-
 
 }

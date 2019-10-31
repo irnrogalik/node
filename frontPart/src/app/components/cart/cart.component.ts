@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderAmount, Cart, OrderResult } from 'src/app/interfaces/Cart';
+import { Cart, OrderResult, ProductsForCart } from 'src/app/interfaces/Cart';
 import { Product } from 'src/app/interfaces/Product';
-import { ProductInCartService } from 'src/app/services/product-in-cart.service';
 import { CartService } from './../../services/cart.service';
 
 @Component({
@@ -14,26 +13,26 @@ export class CartComponent implements OnInit {
 
   cart: Cart;
   thankMessage: string;
+  productIdsInCart: ProductsForCart[];
 
-  constructor(private cartService: CartService, private productInCartService: ProductInCartService) { }
+  constructor(private cartService: CartService) { }
 
   ngOnInit() {
-    const productsIds = this.productInCartService.getProductInCart();
-    console.log(productsIds);
-    if (productsIds) {
-      this.getProductsInCart(productsIds);
+    this.productIdsInCart = this.cartService.getProductInCart();
+    if (this.productIdsInCart) {
+      this.getProductsInCart(this.productIdsInCart);
     }
   }
 
-  getProductsInCart(productsIds: object): void {
-    this.cartService.getProductsInCart(productsIds).subscribe((cart: Cart) => this.cart = cart);
+  getProductsInCart(productIds: object): void {
+    this.cartService.getProductsInCart(productIds).subscribe((cart: Cart) => this.cart = cart);
   }
 
-  createOrder() {
-    this.cartService.createOrder(this.productInCartService.getProductInCart()).subscribe(
+  createOrder(): void {
+    this.cartService.createOrder(this.productIdsInCart).subscribe(
       (result: OrderResult) => {
         if (result.status && result.status === 200) {
-          this.productInCartService.clearCart();
+          this.cartService.clearCart();
         }
         if (result.orderList) {
           this.cart = result.orderList;
@@ -43,9 +42,10 @@ export class CartComponent implements OnInit {
     );
   }
 
-  deleteProductFromCart(product: Product) {
-    this.productInCartService.deleteProductFromCart(product.id);
-    this.getProductsInCart(this.productInCartService.getProductInCart());
+  deleteProductFromCart(product: Product): void {
+    this.cartService.deleteProductFromCart(product.id);
+    this.productIdsInCart = this.productIdsInCart.filter(oneProduct => oneProduct.id !== product.id);
+    this.getProductsInCart(this.productIdsInCart);
   }
 
 }

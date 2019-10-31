@@ -23,7 +23,7 @@
       <td>
         <span
           class="inCart"
-          *ngIf="productsInCartIds[product.id]; else addToCartButton"
+          *ngIf="checkProduct(product.id); else addToCartButton"
           >In <a routerLink="/cart/">cart</a></span
         >
         <ng-template #addToCartButton>

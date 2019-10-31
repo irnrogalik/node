@@ -2,7 +2,7 @@
 <app-response-server-message
   [response]="response"
 ></app-response-server-message>
-<div *ngIf="orders">
+<div *ngIf="orders && orders.length > 0; else emptyMessage">
   <table class="table">
     <thead class="thead-light">
       <tr>
@@ -31,5 +31,8 @@
       </tr>
     </tbody>
   </table>
-  <p *ngIf="!orders">Order list is empty</p>
 </div>
+
+<ng-template #emptyMessage>
+  <p>Order list is empty</p>
+</ng-template>

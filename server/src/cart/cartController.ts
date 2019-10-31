@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { dbConnection } from '../config/config';
-import { Cart, Order, OrderResult } from '../interfaces/Cart';
+import { Cart, Order, OrderResult, ProductsForCart } from '../interfaces/Cart';
 import { setResponse, setResponseError } from '../lib/functions';
 import { CartModelServices } from './cartModelServices';
 
@@ -10,7 +10,7 @@ export class CartServices {
   constructor() { }
 
   async getListProductsInCart(req: Request, res: Response): Promise<void> {
-    const orderListCart: object = req.body;
+    const orderListCart: ProductsForCart[] = req.body;
     if (orderListCart) {
       try {
         const products: Cart = await cartModelServices.getListProductsInCart(orderListCart);
@@ -25,7 +25,7 @@ export class CartServices {
 
   async addOrder(req: Request, res: Response): Promise<void> {
     if (!req.body) res.json(setResponse('no data', 400));
-    const orderListCart: { [ key: number ]: number } = req.body;
+    const orderListCart: ProductsForCart[] = req.body;
     try {
       const orderResult: OrderResult = await cartModelServices.addOrder(orderListCart);
       res.json(orderResult);

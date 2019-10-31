@@ -15,5 +15,5 @@ export const dbConnection: DB_MYSQL = {
 
 export const redis: DB_REDIS = {
   port: 6379,
-  host: 'redis' 
+  host: 'redis'
 };

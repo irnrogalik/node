@@ -1,6 +1,6 @@
 import mysql from 'mysql2';
 import { redis } from '../config/config';
-import { Cart, Order, OrderResult } from '../interfaces/Cart';
+import { Cart, Order, OrderResult, ProductsForCart } from '../interfaces/Cart';
 import { getFormatDate } from '../lib/functions';
 import { RedisModelServices } from '../redis/RedisModelServices';
 import { ResultQuery } from '../interfaces/DB';
@@ -17,12 +17,12 @@ export class CartModelServices {
   private products: Product[];
 
   constructor(connectionConfig: Object) {
-    this.connection = mysql.createConnection(connectionConfig).promise();
+    this.connection = mysql.createConnection(connectionConfig); this.connection = this.connection.promise();
   }
 
-  async getListProductsInCart(orderListCart: object): Promise<Cart> {
+  async getListProductsInCart(orderListCart: ProductsForCart[]): Promise<Cart> {
     try {
-      this.query = `CALL getProductsListInCart('${ Object.keys(orderListCart).join(',') }')`;
+      this.query = `CALL getProductsListInCart('${ orderListCart.map(product => product.id) }')`;
       [ [ this.products ] ] = await this.connection.query(this.query);
       this.orderListInCart = {
         products: [],
@@ -53,7 +53,7 @@ export class CartModelServices {
     }
   }
 
-  async addOrder(orderListCart: { [ key: number ]: number }): Promise<OrderResult> {
+  async addOrder(orderListCart: ProductsForCart[]): Promise<OrderResult> {
     try {
       const orderList: Cart = await this.getListProductsInCart(orderListCart);
       this.query = `INSERT INTO orders(salesTaxes, total) VALUES (${ orderList.order.totalTax }, ${ orderList.order.total })`;
@@ -64,7 +64,7 @@ export class CartModelServices {
         redisModelServices.set({ [ Date.now() ]: `Order with id ${ newOrderId } was added` });
         const orderResult: OrderResult = {
           status: 200,
-          message: `Order #${ newOrderId }  completed 12`,
+          message: `Order #${ newOrderId }  completed`,
           orderList: orderList
         };
         return orderResult;
@@ -76,14 +76,14 @@ export class CartModelServices {
     }
   }
 
-  async addOrderList(newOrderId: number, orderListCart: object): Promise<void> {
+  async addOrderList(newOrderId: number, orderListCart: ProductsForCart[]): Promise<void> {
     try {
-      const orderListId = [];
-      for (const productId in orderListCart) {
-        orderListId.push([ newOrderId, productId, orderListCart[ productId ] ]);
+      const orderList = [];
+      for (const product of orderListCart) {
+        orderList.push([ newOrderId, product.id, product.quantity ]);
       }
       this.query = 'INSERT INTO orderList (orderId, productId, quantity) VALUES ?';
-      this.connection.query(this.query, [ orderListId ]);
+      this.connection.query(this.query, [ orderList ]);
     } catch (e) {
       throw new Error(e);
     }
