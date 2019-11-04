@@ -1,13 +1,13 @@
 import { DB_MYSQL, DB_REDIS } from '../interfaces/DB';
 
 export const initApp: { port: number, host: string } = {
-  port: 3010,
+  port: 3000,
   host: 'localhost'
 };
 
 export const dbConnection: DB_MYSQL = {
   host: 'db',
-  port: 3307,
+  port: 3306,
   user: 'test',
   password: 'test',
   database: 'test_task'
