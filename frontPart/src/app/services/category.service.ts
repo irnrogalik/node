@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Category } from '../interfaces/Category';
-import { Tax } from '../interfaces/tax';
+import { Tax } from '../interfaces/Tax';
 import { environment } from '../../environments/environment';
 
 @Injectable({
