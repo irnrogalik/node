@@ -79,9 +79,7 @@ export class CartModelServices {
   async addOrderList(newOrderId: number, orderListCart: ProductsForCart[]): Promise<void> {
     try {
       const orderList = [];
-      for (const product of orderListCart) {
-        orderList.push([ newOrderId, product.id, product.quantity ]);
-      }
+      orderListCart.map(product => orderList.push([ newOrderId, product.id, product.quantity ]));
       this.query = 'INSERT INTO orderList (orderId, productId, quantity) VALUES ?';
       this.connection.query(this.query, [ orderList ]);
     } catch (e) {
@@ -89,13 +87,11 @@ export class CartModelServices {
     }
   }
 
-  async getOrderList(): Promise<object> {
+  async getOrderList(): Promise<Order[]> {
     try {
       this.query = 'SELECT * FROM orders';
       [ this.orderList ] = await this.connection.query(this.query);
-      for (let i = 0; i < this.orderList.length; i++) {
-        this.orderList[ i ].displayDate = getFormatDate(this.orderList[ i ].date);
-      }
+      this.orderList.map(order => (order.displayDate = getFormatDate(order.date)));
       return this.orderList;
     } catch (e) {
       throw new Error(e);

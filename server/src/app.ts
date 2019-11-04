@@ -7,7 +7,7 @@ import cartRouter from './cart/cartRoutes';
 import categoriesRouter from './categories/categoryRoutes';
 import { initApp } from './config/config';
 import productsRouter from './products/productRoutes';
-import redisRouter from './redis/redisController';
+import redisRouter from './redis/redisRouterController';
 import taxesRouter from './taxes/taxRoutes';
 
 const app = express();

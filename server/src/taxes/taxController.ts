@@ -1,3 +1,4 @@
+import { ResponseServer } from './../interfaces/ResponseServer';
 import { Request, Response } from 'express';
 import { dbConnection } from '../config/config';
 import { TaxModelServices } from './taxModelServices';
@@ -6,12 +7,11 @@ import { Tax } from '../interfaces/Tax';
 
 const TaxModel: TaxModelServices = new TaxModelServices(dbConnection);
 
-export class TaxServices {
-  constructor() { }
-
+export class TaxController {
   async getTaxesList(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await TaxModel.getTaxesList());
+      const taxes:Tax[] = await TaxModel.getTaxesList();
+      res.json(taxes);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -19,7 +19,8 @@ export class TaxServices {
 
   async getOnlyTaxesList(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await TaxModel.getOnlyTaxesList());
+      const taxes: Tax[] = await TaxModel.getOnlyTaxesList();
+      res.json(taxes);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -29,7 +30,8 @@ export class TaxServices {
     if (!req.body) res.json(setResponse('no data', 400));
     const newTax: Tax = req.body;
     try {
-      res.json(setResponse(await TaxModel.addTax(newTax)));
+      const response:ResponseServer = setResponse(await TaxModel.addTax(newTax));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -38,7 +40,8 @@ export class TaxServices {
   async deleteTax(req: Request, res: Response): Promise<void> {
     const taxId: Tax[ 'id' ] = Number(req.params.id);
     try {
-      res.json(setResponse(await TaxModel.deleteTax(taxId)));
+      const response: ResponseServer = setResponse(await TaxModel.deleteTax(taxId));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }

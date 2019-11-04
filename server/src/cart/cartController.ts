@@ -3,12 +3,11 @@ import { dbConnection } from '../config/config';
 import { Cart, Order, OrderResult, ProductsForCart } from '../interfaces/Cart';
 import { setResponse, setResponseError } from '../lib/functions';
 import { CartModelServices } from './cartModelServices';
+import { ResponseServer } from '../interfaces/ResponseServer';
 
 const cartModelServices: CartModelServices = new CartModelServices(dbConnection);
 
-export class CartServices {
-  constructor() { }
-
+export class CartController {
   async getListProductsInCart(req: Request, res: Response): Promise<void> {
     const orderListCart: ProductsForCart[] = req.body;
     if (orderListCart) {
@@ -19,7 +18,8 @@ export class CartServices {
         res.json(setResponseError(e));
       }
     } else {
-      res.json(setResponse('cart is empty'));
+      const response:ResponseServer = setResponse('cart is empty');
+      res.json(response);
     }
   }
 
@@ -36,7 +36,8 @@ export class CartServices {
 
   async getOrderList(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await cartModelServices.getOrderList());
+      const orderList: Order[] = await cartModelServices.getOrderList();
+      res.json(orderList);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -45,7 +46,8 @@ export class CartServices {
   async deleteOrder(req: Request, res: Response): Promise<void> {
     const orderId: Order[ 'id' ] = Number(req.params.id);
     try {
-      res.json(setResponse(await cartModelServices.deleteOrder(orderId)));
+      const response:ResponseServer = setResponse(await cartModelServices.deleteOrder(orderId));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }

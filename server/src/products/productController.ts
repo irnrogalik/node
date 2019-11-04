@@ -1,3 +1,4 @@
+import { ResponseServer } from './../interfaces/ResponseServer';
 import { Product } from '../interfaces/Product';
 import { Request, Response } from 'express';
 import { dbConnection } from '../config/config';
@@ -6,12 +7,11 @@ import { setResponseError, setResponse } from '../lib/functions';
 
 const productModelServices: ProductModelServices = new ProductModelServices(dbConnection);
 
-export class ProductServices {
-  constructor() { }
-
+export class ProductController {
   async getListProducts(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await productModelServices.getProductsList());
+      const products: Product[] = await productModelServices.getProductsList();
+      res.json(products);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -20,6 +20,7 @@ export class ProductServices {
   async addProduct(req: Request, res: Response): Promise<void> {
     if (!req.body) res.json(setResponse('no data', 400));
     const newProduct: Product = req.body;
+    let response: ResponseServer;
     try {
       const addResult: { message: string, insertId: number } = await productModelServices.addProduct(newProduct);
       if (newProduct.categories && newProduct.categories.length > 0) {
@@ -31,10 +32,12 @@ export class ProductServices {
         try {
           productModelServices.addProductCategory([ categoryProduct ]);
         } catch (e) {
-          res.json(setResponse('Something wrong with binding categories. Check the product', 400));
+          response = setResponse('Something wrong with binding categories. Check the product', 400);
+          res.json(response);
         }
       }
-      res.json(setResponse(addResult.message));
+      response = setResponse(addResult.message);
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -43,7 +46,8 @@ export class ProductServices {
   async deleteProduct(req: Request, res: Response): Promise<void> {
     const productId: Product[ 'id' ] = Number(req.params.id);
     try {
-      res.json(setResponse(await productModelServices.deleteProduct(productId)));
+      const response: ResponseServer = setResponse(await productModelServices.deleteProduct(productId));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }

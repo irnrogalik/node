@@ -1,3 +1,4 @@
+import { ResponseServer } from './../interfaces/ResponseServer';
 import { Category } from '../interfaces/Category';
 import { Request, Response } from 'express';
 import { dbConnection } from '../config/config';
@@ -6,12 +7,11 @@ import { setResponse, setResponseError } from '../lib/functions';
 
 const CategoryModel: CategoryModelServices = new CategoryModelServices(dbConnection);
 
-export class CategoryServices {
-  constructor() { }
-
+export class CategoryController {
   async getCategoriesList(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await CategoryModel.getCategoriesList());
+      const categories: Category[] = await CategoryModel.getCategoriesList();
+      res.json(categories);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -19,7 +19,8 @@ export class CategoryServices {
 
   async getOnlyCategoriesList(req: Request, res: Response): Promise<void> {
     try {
-      res.json(await CategoryModel.getOnlyCategoriesList());
+      const categories: Category[] = await CategoryModel.getOnlyCategoriesList();
+      res.json(categories);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -29,7 +30,8 @@ export class CategoryServices {
     if (!req.body) res.json(setResponse('no data', 400));
     const newCategory: Category = req.body;
     try {
-      res.json(setResponse(await CategoryModel.addCategory(newCategory)));
+      const response: ResponseServer = setResponse(await CategoryModel.addCategory(newCategory));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }
@@ -38,7 +40,8 @@ export class CategoryServices {
   async deleteCategory(req: Request, res: Response): Promise<void> {
     const categoryId: Category[ 'id' ] = Number(req.params.id);
     try {
-      res.json(setResponse(await CategoryModel.deleteCategory(categoryId)));
+      const response: ResponseServer = setResponse(await CategoryModel.deleteCategory(categoryId));
+      res.json(response);
     } catch (e) {
       res.json(setResponseError(e));
     }

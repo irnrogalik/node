@@ -24,11 +24,13 @@ for (const setId in productsConfig) {
 
     it('Result have list of products', () => {
       expect(cart).to.have.property('products');
+      expect(cart.products).to.have.length((Object.keys(outputOrderList.products)).length);
       outputProducts = cart.products;
     });
 
     it('Result have order', () => {
       expect(cart).to.have.property('order');
+      expect(cart).to.have.length(2);
       outputOrder = cart.order;
     });
 

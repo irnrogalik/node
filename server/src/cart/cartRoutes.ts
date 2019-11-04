@@ -1,19 +1,19 @@
 import express from 'express';
-import { CartServices } from './cartController';
+import { CartController } from './cartController';
 
-const cartServices: CartServices = new CartServices();
+const cartController: CartController = new CartController();
 const router: express.Router = express.Router();
 
 router.route('/')
-  .post(cartServices.getListProductsInCart);
+  .post(cartController.getListProductsInCart);
 
 router.route('/order')
-  .post(cartServices.addOrder);
+  .post(cartController.addOrder);
 
 router.route('/delete/:id')
-  .get(cartServices.deleteOrder);
+  .get(cartController.deleteOrder);
 
 router.route('/orderList')
-  .get(cartServices.getOrderList);
+  .get(cartController.getOrderList);
 
 export = router;

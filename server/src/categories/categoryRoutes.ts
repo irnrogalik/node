@@ -1,19 +1,19 @@
 import express from 'express';
-import { CategoryServices } from './categoryController';
+import { CategoryController } from './categoryController';
 
-const CategoryController: CategoryServices = new CategoryServices();
+const categoryController: CategoryController = new CategoryController();
 const router: express.Router = express.Router();
 
 router.route('/')
-  .get(CategoryController.getCategoriesList);
+  .get(categoryController.getCategoriesList);
 
 router.route('/get')
-  .get(CategoryController.getOnlyCategoriesList);
+  .get(categoryController.getOnlyCategoriesList);
 
 router.route('/add')
-  .post(CategoryController.addCategory);
+  .post(categoryController.addCategory);
 
 router.route('/delete/:id')
-  .post(CategoryController.deleteCategory);
+  .post(categoryController.deleteCategory);
 
 export = router;

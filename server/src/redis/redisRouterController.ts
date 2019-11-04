@@ -10,7 +10,6 @@ const redisModelServices: RedisModelServices = new RedisModelServices(redis);
 router.route('/').get(async (req: express.Request, res: express.Response) => {
   const logs_: RedisObject<string>[] = await redisModelServices.get();
   const logs: DisplayRedisObject[] = [];
-
   for (const date in logs_) {
     logs.push({ date: getFormatDate(new Date(Number(date))), descriptionLog: logs_[ date ] });
   }
@@ -19,7 +18,8 @@ router.route('/').get(async (req: express.Request, res: express.Response) => {
 
 router.route('/flush').get((req: express.Request, res: express.Response) => {
   const resultOfFlush: Promise<Boolean> = redisModelServices.flush();
-  res.json({ resultFlush: resultOfFlush ? 'Log was deleted' : 'Something wrong. Try again' });
+  const response: {resultFlush:string} = { resultFlush: resultOfFlush ? 'Log was deleted' : 'Something wrong. Try again' };
+  res.json(response);
 });
 
 export = router;

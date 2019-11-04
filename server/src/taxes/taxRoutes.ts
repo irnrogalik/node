@@ -1,19 +1,19 @@
 import express from 'express';
-import { TaxServices } from './taxController';
+import { TaxController } from './taxController';
 
 const router: express.Router = express.Router();
-const taxServices: TaxServices = new TaxServices();
+const taxController: TaxController = new TaxController();
 
 router.route('/')
-  .get(taxServices.getTaxesList);
+  .get(taxController.getTaxesList);
 
 router.route('/get')
-  .get(taxServices.getOnlyTaxesList);
+  .get(taxController.getOnlyTaxesList);
 
 router.route('/add')
-  .post(taxServices.addTax);
+  .post(taxController.addTax);
 
 router.route('/delete/:id')
-  .get(taxServices.deleteTax);
+  .get(taxController.deleteTax);
 
 export = router;

@@ -1,16 +1,16 @@
 import express from 'express';
-import { ProductServices } from './productController';
+import { ProductController } from './productController';
 
-const productServices: ProductServices = new ProductServices();
+const productController: ProductController = new ProductController();
 const router: express.Router = express.Router();
 
 router.route('/')
-  .get(productServices.getListProducts);
+  .get(productController.getListProducts);
 
 router.route('/add')
-  .post(productServices.addProduct);
+  .post(productController.addProduct);
 
 router.route('/delete/:id')
-  .post(productServices.deleteProduct);
+  .post(productController.deleteProduct);
 
 export = router;
