@@ -1,4 +1,4 @@
-import { ProductsForCart } from './../../../frontPart/src/app/interfaces/Cart';
+import { ProductsForCart } from './../../src/interfaces/Cart';
 import chai from 'chai';
 import supertest from 'supertest';
 import app from '../../src/app';
