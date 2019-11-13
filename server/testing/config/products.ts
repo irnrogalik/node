@@ -15,20 +15,26 @@ export interface CartContent {
 export const productsConfig: CartForTest = {
   set1: {
     products: {
-      // Product with id = 1 and starting price 16.00
+      // Product with id = 1 and starting finalPrice 16.00
       1: {
         price: 16.00,
-        name: '16lb bag of Skittles'
+        finalPrice: 16.00,
+        name: '16lb bag of Skittles',
+        taxValue: null
       },
-      // Product with id = 2 and starting price 99.99
+      // Product with id = 2 and starting finalPrice 99.99
       2: {
-        price: 109.99,
-        name: 'Walkman'
+        price: 99.99,
+        finalPrice: 109.99,
+        name: 'Walkman',
+        taxValue: '10'
       },
-      // Product with id = 3 and starting price 0.99
+      // Product with id = 3 and starting finalPrice 0.99
       3: {
         price: 0.99,
-        name: 'Popcorn'
+        finalPrice: 0.99,
+        name: 'Popcorn',
+        taxValue: null
       }
     },
     order: {
@@ -38,43 +44,55 @@ export const productsConfig: CartForTest = {
   },
   set2: {
     products: {
-      // Product with id = 4 and starting price 11.00
+      // Product with id = 4 and starting finalPrice 11.00
       4: {
-        price: 11.55,
-        name: 'Vanilla-Hazelnut Coffee'
+        price: 11.00,
+        finalPrice: 11.55,
+        name: 'Vanilla-Hazelnut Coffee',
+        taxValue: '5'
       },
-      // Product with id = 5 and starting price 15 001.25
+      // Product with id = 5 and starting finalPrice 15 001.25
       5: {
-        price: 17251.44,
-        name: 'Vespa'
+        price: 15001.25,
+        finalPrice: 17251.5,
+        name: 'Vespa',
+        taxValue: '10, 5'
       }
     },
     order: {
-      totalTax: 2250.74,
-      total: 17262.99
+      totalTax: 2250.80,
+      total: 17263.05
     }
   },
   set3: {
     products: {
-      // Product with id = 6 and starting price 75.99
+      // Product with id = 6 and starting finalPrice 75.99
       6: {
-        price: 79.79,
-        name: 'crate of Almond Snickers'
+        price: 75.99,
+        finalPrice: 79.79,
+        name: 'crate of Almond Snickers',
+        taxValue: '5'
       },
-      // Product with id = 7 and starting price 55.00
+      // Product with id = 7 and starting finalPrice 55.00
       7: {
-        price: 60.5,
-        name: 'Discman'
+        price: 55.00,
+        finalPrice: 60.5,
+        name: 'Discman',
+        taxValue: '10'
       },
-      // Product with id = 8 and starting price 10.00
+      // Product with id = 8 and starting finalPrice 10.00
       8: {
-        price: 11.5,
-        name: 'Bottle of Wine'
+        price: 10.00,
+        finalPrice: 11.5,
+        name: 'Bottle of Wine',
+        taxValue: '10, 5'
       },
-      // Product with id = 9 and starting price 997.99
+      // Product with id = 9 and starting finalPrice 997.99
       9: {
         price: 997.99,
-        name: '300# bag of Fair-Trade Coffee'
+        finalPrice: 997.99,
+        name: '300# bag of Fair-Trade Coffee',
+        taxValue: null
       }
     },
     order: {

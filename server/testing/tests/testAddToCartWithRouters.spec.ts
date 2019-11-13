@@ -33,7 +33,7 @@ describe('Test to router', () => {
   });
 
   describe('Add second order', () => {
-    it('Order price should be equal 17262.99 and sales taxes should be equal 2250.74', async () => {
+    it('Order price should be equal 17263.05 and sales taxes should be equal 2250.8', async () => {
       const bodyData: ProductsForCart[] = [
         { id: 4, quantity: 1 },
         { id: 5, quantity: 1 }
@@ -51,8 +51,8 @@ describe('Test to router', () => {
 
       result.should.have.property('orderList');
       result.orderList.should.have.property('order');
-      result.orderList.order.totalTax.should.be.eql(2250.74);
-      result.orderList.order.total.should.be.eql(17262.99);
+      result.orderList.order.totalTax.should.be.eql(2250.8);
+      result.orderList.order.total.should.be.eql(17263.05);
     });
   });
 

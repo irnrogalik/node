@@ -30,7 +30,7 @@ for (const setId in productsConfig) {
 
     it('Result have order', () => {
       expect(cart).to.have.property('order');
-      expect(cart).to.have.length(2);
+      expect(Object.keys(cart.order)).to.have.length(2);
       outputOrder = cart.order;
     });
 
@@ -45,9 +45,9 @@ for (const setId in productsConfig) {
 
       for (const productId in products) {
         const product: Product = products[ productId ];
-        const { name: productName, price: productPrice } = product;
+        const { name: productName, finalPrice: productPrice } = product;
 
-        describe(`Product name should be equal ${ productName } and  price should be equal ${ productPrice }`, () => {
+        describe(`Product name should be equal ${ productName } and price should be equal ${ productPrice }`, () => {
           it(`Product name should be equal ${ productName }`, () => {
             const productOutput: Product = cart.products.find(
               (product: Product) => product.id === Number(productId)
