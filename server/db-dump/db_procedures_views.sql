@@ -3,7 +3,7 @@ DELIMITER $$
 CREATE PROCEDURE getproductsListInCart(IN idList NVARCHAR(100))
 BEGIN
 	SET @sql = CONCAT('
-        SELECT products.id, products.name, products.price, SUM(products.price * (taxes.value / 100)) as productTax
+        SELECT products.id, products.name, products.price, GROUP_CONCAT(taxes.value) as taxValue
         FROM products
             LEFT JOIN productTaxes on products.id = productTaxes.productId
             LEFT JOIN taxes on productTaxes.taxId = taxes.id
