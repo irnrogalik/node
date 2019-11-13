@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  appUrl: 'http://localhost:3010',
+  appUrl: 'http://localhost:3000',
   taxUrl: 'taxes',
   categoryUrl: 'categories',
   productUrl: 'products',

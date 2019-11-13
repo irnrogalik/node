@@ -14,10 +14,10 @@ services:
     working_dir: /app
     command: npm run start
     ports:
-      - 3010:3000
+      - 3000:3000
       - 9228:9229
     environment:
-      - PORT=3010
+      - PORT=3000
     links:
       - db:db
       - redis:redis
@@ -27,7 +27,6 @@ services:
   db:
     image: mysql:5.7.28
     container_name: mysql-for-test-task
-    # command: --default-authentication-plugin=mysql_native_password
     restart: always
     volumes:
       - ./server/db-dump:/docker-entrypoint-initdb.d
@@ -60,7 +59,7 @@ services:
       - 4200:4200
     environment:
       - PORT=4200
-  # links:
-  #   - server-back:server-back
-  # depends_on:
-  #   - server-back
+    links:
+      - server-back:server-back
+    depends_on:
+      - server-back

@@ -16,4 +16,4 @@ router.route('/add')
 router.route('/delete/:id')
   .post(categoryController.deleteCategory);
 
-export = router;
+export default router;

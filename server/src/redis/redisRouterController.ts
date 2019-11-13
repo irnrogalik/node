@@ -18,8 +18,8 @@ router.route('/').get(async (req: express.Request, res: express.Response) => {
 
 router.route('/flush').get((req: express.Request, res: express.Response) => {
   const resultOfFlush: Promise<Boolean> = redisModelServices.flush();
-  const response: {resultFlush:string} = { resultFlush: resultOfFlush ? 'Log was deleted' : 'Something wrong. Try again' };
+  const response: { resultFlush: string } = { resultFlush: resultOfFlush ? 'Log was deleted' : 'Something wrong. Try again' };
   res.json(response);
 });
 
-export = router;
+export default router;

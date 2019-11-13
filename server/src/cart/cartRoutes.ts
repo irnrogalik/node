@@ -16,4 +16,4 @@ router.route('/delete/:id')
 router.route('/orderList')
   .get(cartController.getOrderList);
 
-export = router;
+export default router;

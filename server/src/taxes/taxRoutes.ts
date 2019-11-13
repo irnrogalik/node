@@ -16,4 +16,4 @@ router.route('/add')
 router.route('/delete/:id')
   .get(taxController.deleteTax);
 
-export = router;
+export default router;

@@ -13,4 +13,4 @@ router.route('/add')
 router.route('/delete/:id')
   .post(productController.deleteProduct);
 
-export = router;
+export default router;

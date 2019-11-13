@@ -6,8 +6,8 @@ WORKDIR /app
 
 COPY package*.json /app
 
-RUN npm install pm2@latest -g -y
-
+RUN npm install -y
+EXPOSE 3000
 COPY . .
 
 CMD [ "npm", "start" ]

@@ -48,11 +48,11 @@ app.use(function (e, req, res, next) {
   res.render('error');
 });
 
-app.listen(initApp.port, initApp.host, err => {
+app.listen(initApp.port, err => {
   if (err) {
     return console.error(err);
   }
   return console.log(`server is listening on ${ initApp.port } `);
 });
 
-export = app;
+export default app;

@@ -2,9 +2,9 @@
   "name": "node_project",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
+  "main": "dist/src/app.js",
   "scripts": {
-    "start": "tsc && node dist/server/src/app.js",
+    "start": "tsc && node dist/src/app.js",
     "lint": "eslint src/**/*.ts src/*.ts testing/**/*.ts",
     "test": "mocha -r ts-node/register testing/tests/*.spec.ts --exit"
   },
@@ -37,9 +37,12 @@
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
+    "front": "0.0.1",
     "hbs": "^4.0.5",
+    "install": "^0.13.0",
     "morgan": "^1.9.1",
     "mysql2": "^1.7.0",
+    "npm": "^6.12.1",
     "redis": "^2.8.0"
   }
 }
