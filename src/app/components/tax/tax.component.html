@@ -1,0 +1,29 @@
+<h2>Taxes</h2>
+
+<p><a routerLink="/tax/add">+ add tax</a></p>
+
+<app-response-server-message [response]="response">
+</app-response-server-message>
+
+<table *ngIf="taxes" class="table">
+  <thead class="thead-light">
+    <tr>
+      <th>Name</th>
+      <th>Value</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let tax of taxes">
+      <td>{{ tax.name }}</td>
+      <td>{{ tax.value }}</td>
+      <td>{{ tax.description }}</td>
+      <td>
+        <button class="delete" title="delete tax" (click)="deleteTax(tax)">
+          X
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

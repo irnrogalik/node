@@ -1,0 +1,41 @@
+<h2>Add product</h2>
+
+<app-response-server-message [response]="response">
+</app-response-server-message>
+<div class="col-md-6">
+  <form [formGroup]="addProductForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Name</label>
+      <input class="form-control" formControlName="name" required />
+      <app-validation-errors
+        *ngIf="errors && errors.name"
+        [errors]="errors.name"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group">
+      <label>Amount</label>
+      <input
+        type="number"
+        class="form-control"
+        formControlName="amount"
+        required
+      />
+      <app-validation-errors
+        *ngIf="errors && errors.price"
+        [errors]="errors.price"
+      ></app-validation-errors>
+    </div>
+    <div class="form-group" *ngIf="categories">
+      <label>Category</label>
+      <select class="form-control" formControlName="categories" multiple>
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button class="btn btn-secondary">Save</button>
+    </div>
+    <button class="btn btn-secondary" (click)="goBack()">go back</button>
+  </form>
+</div>
