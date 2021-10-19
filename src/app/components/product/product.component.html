@@ -18,7 +18,7 @@
   <tbody>
     <tr *ngFor="let product of products">
       <td>{{ product.name }}</td>
-      <td>{{ product.amount }}</td>
+      <td>{{ product.amount.toFixed(2) }}</td>
       <td>{{ product.categoryname }}</td>
       <td>
         <span

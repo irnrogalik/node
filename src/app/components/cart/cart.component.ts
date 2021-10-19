@@ -34,10 +34,9 @@ export class CartComponent implements OnInit {
         if (result.status && result.status === 200) {
           this.cartService.clearCart();
         }
-        if (result.orderList) {
-          this.cart = result.orderList;
+        if (result.products && result.order) {
+          this.thankMessage = 'Order was created';
         }
-        this.thankMessage = result.message;
       },
     );
   }

@@ -37,7 +37,6 @@ export class CartService {
   }
 
   getProductsInCart(productIds: object): Observable<Cart> {
-    console.log('cart',productIds);
     return this.http.post<Cart>(`${ environment.appUrl }/${ environment.orderUrl }/cart`, productIds, this.httpOptions);
   }
 

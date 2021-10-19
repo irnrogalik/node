@@ -21,7 +21,9 @@ export interface OrderAmount {
 export interface OrderResult {
   status: number;
   message: string;
-  orderList: Cart;
+  // orderList: Cart;
+  products: Product[];
+  order: OrderAmount;
 }
 
 export interface ProductsForCart {
